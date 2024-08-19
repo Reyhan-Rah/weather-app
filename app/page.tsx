@@ -17,9 +17,17 @@ interface WeatherData {
     icon: string;
 }
 
+interface ForecastData {
+    date: string;
+    temperature: number;
+    description: string;
+    icon: string;
+}
+
 export default function Home() {
     const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
     const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [forecast, setForecast] = useState<ForecastData[]>([]);
 
     useEffect(() => {
         if (navigator.geolocation) {
@@ -41,26 +49,37 @@ export default function Home() {
 
     useEffect(() => {
         if (location) {
-            const fetchWeather = async () => {
+            const fetchWeatherAndForecast = async () => {
                 const response = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
+                    `https://api.openweathermap.org/data/3.0/onecall?lat=${location.latitude}&lon=${location.longitude}&units=metric&exclude=minutely,hourly&appid=${API_KEY}`
                 );
                 const data = await response.json();
-
+                console.log(response)
+                // Current Weather Data
                 setWeather({
-                    temperature: data.main.temp,
-                    feels_like: data.main.feels_like,
-                    humidity: data.main.humidity,
-                    pressure: data.main.pressure,
-                    wind_speed: data.wind.speed,
-                    wind_deg: data.wind.deg,
-                    description: data.weather[0].description,
-                    city: data.name,
-                    country: data.sys.country,
-                    icon: data.weather[0].icon,
+                    temperature: data.current.temp,
+                    feels_like: data.current.feels_like,
+                    humidity: data.current.humidity,
+                    pressure: data.current.pressure,
+                    wind_speed: data.current.wind_speed,
+                    wind_deg: data.current.wind_deg,
+                    description: data.current.weather[0].description,
+                    city: data.timezone, // Timezone can be used for city name approximation
+                    country: '', // Not directly provided by One Call API
+                    icon: data.current.weather[0].icon,
                 });
+
+                // Forecast Data
+                const dailyForecast = data.daily.slice(1, 4).map((day: any) => ({
+                    date: new Date(day.dt * 1000).toLocaleDateString(undefined, { weekday: 'long' }),
+                    temperature: day.temp.day,
+                    description: day.weather[0].description,
+                    icon: day.weather[0].icon,
+                }));
+
+                setForecast(dailyForecast);
             };
-            fetchWeather();
+            fetchWeatherAndForecast();
         }
     }, [location]);
 
@@ -69,7 +88,7 @@ export default function Home() {
             <h1 className="text-4xl font-bold mb-8">Weather App</h1>
             {weather ? (
                 <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h2 className="text-2xl font-bold mb-2">{weather.city}, {weather.country}</h2>
+                    <h2 className="text-2xl font-bold mb-2">{weather.city}</h2>
                     <p className="text-xl">{weather.temperature}°C</p>
                     <p className="text-lg capitalize">{weather.description}</p>
                     <img
@@ -84,6 +103,23 @@ export default function Home() {
                         <p><strong>Wind Speed:</strong> {weather.wind_speed} m/s</p>
                         <p><strong>Wind Direction:</strong> {weather.wind_deg}°</p>
                     </div>
+                    <div className="mt-8">
+                        <h3 className="text-xl font-bold mb-4">3-Day Forecast</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            {forecast.map((day, index) => (
+                                <div key={index} className="bg-gray-100 p-4 rounded-lg">
+                                    <h4 className="font-bold">{day.date}</h4>
+                                    <img
+                                        src={`http://openweathermap.org/img/wn/${day.icon}@2x.png`}
+                                        alt="Weather Icon"
+                                        className="mx-auto mb-2"
+                                    />
+                                    <p>{day.temperature}°C</p>
+                                    <p className="capitalize">{day.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <p>Loading weather data...</p>
@@ -91,4 +127,5 @@ export default function Home() {
         </div>
     );
 }
+
 
