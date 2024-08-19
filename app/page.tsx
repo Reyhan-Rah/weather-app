@@ -19,7 +19,8 @@ interface WeatherData {
 
 interface ForecastData {
     date: string;
-    temperature: number;
+    minTemp: number;
+    maxTemp: number;
     description: string;
     icon: string;
 }
@@ -75,14 +76,28 @@ export default function Home() {
                 );
                 const data = await response.json();
 
-                const dailyForecast = data.list.filter((_: any, index: number) => index % 8 === 0).map((item: any) => ({
-                    date: new Date(item.dt * 1000).toLocaleDateString(undefined, { weekday: 'long' }),
-                    temperature: item.main.temp,
-                    description: item.weather[0].description,
-                    icon: item.weather[0].icon,
-                }));
+                // Group the forecast data by day
+                const dailyForecast: { [key: string]: ForecastData } = {};
 
-                setForecast(dailyForecast);
+                data.list.forEach((item: any) => {
+                    const date = new Date(item.dt * 1000).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+
+                    if (!dailyForecast[date]) {
+                        dailyForecast[date] = {
+                            date,
+                            minTemp: item.main.temp_min,
+                            maxTemp: item.main.temp_max,
+                            description: item.weather[0].description,
+                            icon: item.weather[0].icon,
+                        };
+                    } else {
+                        dailyForecast[date].minTemp = Math.min(dailyForecast[date].minTemp, item.main.temp_min);
+                        dailyForecast[date].maxTemp = Math.max(dailyForecast[date].maxTemp, item.main.temp_max);
+                    }
+                });
+
+                // Convert the object to an array and limit to 6 days
+                setForecast(Object.values(dailyForecast).slice(0, 6));
             };
 
             fetchWeather();
@@ -91,11 +106,11 @@ export default function Home() {
     }, [location]);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50 p-4">
-            <h1 className="text-4xl font-bold mb-8">Weather App</h1>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50 p-4 overflow-y-scroll ">
+            <h1 className="text-2xl md:text-4xl font-bold mb-8">Weather App</h1>
             {weather ? (
                 <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h2 className="text-2xl font-bold mb-2">{weather.city}, {weather.country}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold mb-2">{weather.city}, {weather.country}</h2>
                     <p className="text-xl">{weather.temperature}°C</p>
                     <p className="text-lg capitalize">{weather.description}</p>
                     <img
@@ -111,18 +126,18 @@ export default function Home() {
                         <p><strong>Wind Direction:</strong> {weather.wind_deg}°</p>
                     </div>
                     <div className="mt-8">
-                        <h3 className="text-xl font-bold mb-4">5-Day Forecast</h3>
-                        <div className="grid grid-cols-3 gap-4">
+                        <h3 className="text-xl font-bold mb-4">6-Day Forecast</h3>
+                        <div className="grid grid-cols-3 gap-2 md:gap-4">
                             {forecast.map((day, index) => (
-                                <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                                    <h4 className="font-bold">{day.date}</h4>
+                                <div key={index} className="bg-gray-100 p-2 md:p-4 rounded-lg">
+                                    <h4 className="text-sm md:text-base font-bold">{day.date}</h4>
                                     <img
                                         src={`http://openweathermap.org/img/wn/${day.icon}@2x.png`}
                                         alt="Weather Icon"
                                         className="mx-auto mb-2"
                                     />
-                                    <p>{day.temperature}°C</p>
-                                    <p className="capitalize">{day.description}</p>
+                                    <p className="text-sm md:text-lg">{day.minTemp}°C - {day.maxTemp}°C</p>
+                                    <p className="text-sm md:text-base capitalize">{day.description}</p>
                                 </div>
                             ))}
                         </div>
