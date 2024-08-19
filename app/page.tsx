@@ -49,37 +49,44 @@ export default function Home() {
 
     useEffect(() => {
         if (location) {
-            const fetchWeatherAndForecast = async () => {
+            const fetchWeather = async () => {
                 const response = await fetch(
-                    `https://api.openweathermap.org/data/3.0/onecall?lat=${location.latitude}&lon=${location.longitude}&units=metric&exclude=minutely,hourly&appid=${API_KEY}`
+                    `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
                 );
                 const data = await response.json();
-                console.log(response)
-                // Current Weather Data
-                setWeather({
-                    temperature: data.current.temp,
-                    feels_like: data.current.feels_like,
-                    humidity: data.current.humidity,
-                    pressure: data.current.pressure,
-                    wind_speed: data.current.wind_speed,
-                    wind_deg: data.current.wind_deg,
-                    description: data.current.weather[0].description,
-                    city: data.timezone, // Timezone can be used for city name approximation
-                    country: '', // Not directly provided by One Call API
-                    icon: data.current.weather[0].icon,
-                });
 
-                // Forecast Data
-                const dailyForecast = data.daily.slice(1, 4).map((day: any) => ({
-                    date: new Date(day.dt * 1000).toLocaleDateString(undefined, { weekday: 'long' }),
-                    temperature: day.temp.day,
-                    description: day.weather[0].description,
-                    icon: day.weather[0].icon,
+                setWeather({
+                    temperature: data.main.temp,
+                    feels_like: data.main.feels_like,
+                    humidity: data.main.humidity,
+                    pressure: data.main.pressure,
+                    wind_speed: data.wind.speed,
+                    wind_deg: data.wind.deg,
+                    description: data.weather[0].description,
+                    city: data.name,
+                    country: data.sys.country,
+                    icon: data.weather[0].icon,
+                });
+            };
+
+            const fetchForecast = async () => {
+                const response = await fetch(
+                    `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
+                );
+                const data = await response.json();
+
+                const dailyForecast = data.list.filter((_: any, index: number) => index % 8 === 0).map((item: any) => ({
+                    date: new Date(item.dt * 1000).toLocaleDateString(undefined, { weekday: 'long' }),
+                    temperature: item.main.temp,
+                    description: item.weather[0].description,
+                    icon: item.weather[0].icon,
                 }));
 
                 setForecast(dailyForecast);
             };
-            fetchWeatherAndForecast();
+
+            fetchWeather();
+            fetchForecast();
         }
     }, [location]);
 
@@ -88,7 +95,7 @@ export default function Home() {
             <h1 className="text-4xl font-bold mb-8">Weather App</h1>
             {weather ? (
                 <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h2 className="text-2xl font-bold mb-2">{weather.city}</h2>
+                    <h2 className="text-2xl font-bold mb-2">{weather.city}, {weather.country}</h2>
                     <p className="text-xl">{weather.temperature}°C</p>
                     <p className="text-lg capitalize">{weather.description}</p>
                     <img
@@ -104,7 +111,7 @@ export default function Home() {
                         <p><strong>Wind Direction:</strong> {weather.wind_deg}°</p>
                     </div>
                     <div className="mt-8">
-                        <h3 className="text-xl font-bold mb-4">3-Day Forecast</h3>
+                        <h3 className="text-xl font-bold mb-4">5-Day Forecast</h3>
                         <div className="grid grid-cols-3 gap-4">
                             {forecast.map((day, index) => (
                                 <div key={index} className="bg-gray-100 p-4 rounded-lg">
@@ -127,5 +134,6 @@ export default function Home() {
         </div>
     );
 }
+
 
 
