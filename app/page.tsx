@@ -2,15 +2,20 @@
 
 import { useEffect, useState } from 'react';
 
+const API_KEY= '8de104c15991da954068aab4ef638c95';
+
 interface WeatherData {
     temperature: number;
+    feels_like: number;
+    humidity: number;
+    pressure: number;
+    wind_speed: number;
+    wind_deg: number;
     description: string;
     city: string;
     country: string;
     icon: string;
 }
-
-const API_KEY= '8de104c15991da954068aab4ef638c95';
 
 export default function Home() {
     const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -41,9 +46,14 @@ export default function Home() {
                     `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
                 );
                 const data = await response.json();
-                console.log({data})
+
                 setWeather({
                     temperature: data.main.temp,
+                    feels_like: data.main.feels_like,
+                    humidity: data.main.humidity,
+                    pressure: data.main.pressure,
+                    wind_speed: data.wind.speed,
+                    wind_deg: data.wind.deg,
                     description: data.weather[0].description,
                     city: data.name,
                     country: data.sys.country,
@@ -55,7 +65,7 @@ export default function Home() {
     }, [location]);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50 p-4">
             <h1 className="text-4xl font-bold mb-8">Weather App</h1>
             {weather ? (
                 <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -65,8 +75,15 @@ export default function Home() {
                     <img
                         src={`http://openweathermap.org/img/wn/${weather.icon}@2x.png`}
                         alt="Weather Icon"
-                        className="mx-auto"
+                        className="mx-auto mb-4"
                     />
+                    <div className="text-left">
+                        <p><strong>Feels like:</strong> {weather.feels_like}°C</p>
+                        <p><strong>Humidity:</strong> {weather.humidity}%</p>
+                        <p><strong>Pressure:</strong> {weather.pressure} hPa</p>
+                        <p><strong>Wind Speed:</strong> {weather.wind_speed} m/s</p>
+                        <p><strong>Wind Direction:</strong> {weather.wind_deg}°</p>
+                    </div>
                 </div>
             ) : (
                 <p>Loading weather data...</p>
@@ -74,3 +91,4 @@ export default function Home() {
         </div>
     );
 }
+
