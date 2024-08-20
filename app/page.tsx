@@ -1,8 +1,8 @@
 'use client';
 
-import Weather from './components/weather';
-import Forecast from './components/forecast';
-import { useWeather } from './hooks/useWeather';
+import Weather from '../components/weather';
+import Forecast from '../components/forecast';
+import { useWeather } from '../hooks/useWeather';
 
 export default function Home() {
   const { weather, forecast, errorMessage } = useWeather();
