@@ -98,7 +98,7 @@ export function useWeather() {
 
           const dailyForecast: { [key: string]: ForecastData } = {};
 
-          data.list.forEach((item: any) => {
+          data?.list?.forEach((item: any) => {
             const date = new Date(item.dt * 1000).toLocaleDateString(undefined, {
               weekday: 'long',
               day: 'numeric',
