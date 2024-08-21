@@ -35,16 +35,16 @@ export function useWeather() {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-          },
-          (error) => {
-            setErrorMessage('Error getting location.');
-            console.error('Error getting location:', error);
-          }
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          setErrorMessage('Error getting location.');
+          console.error('Error getting location:', error);
+        }
       );
     } else {
       setErrorMessage('Geolocation is not supported by this browser.');
@@ -56,11 +56,13 @@ export function useWeather() {
       const fetchWeather = async () => {
         try {
           const response = await fetch(
-              `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
           );
 
           if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            throw new Error(
+              `Error: ${response.status} - ${response.statusText}`
+            );
           }
 
           const data = await response.json();
@@ -87,11 +89,13 @@ export function useWeather() {
       const fetchForecast = async () => {
         try {
           const response = await fetch(
-              `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&units=metric&appid=${API_KEY}`
           );
 
           if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            throw new Error(
+              `Error: ${response.status} - ${response.statusText}`
+            );
           }
 
           const data = await response.json();
@@ -99,11 +103,14 @@ export function useWeather() {
           const dailyForecast: { [key: string]: ForecastData } = {};
 
           data?.list?.forEach((item: any) => {
-            const date = new Date(item.dt * 1000).toLocaleDateString(undefined, {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-            });
+            const date = new Date(item.dt * 1000).toLocaleDateString(
+              undefined,
+              {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+              }
+            );
             if (!dailyForecast[date]) {
               dailyForecast[date] = {
                 date,
@@ -114,12 +121,12 @@ export function useWeather() {
               };
             } else {
               dailyForecast[date].minTemp = Math.min(
-                  dailyForecast[date].minTemp,
-                  item.main.temp_min
+                dailyForecast[date].minTemp,
+                item.main.temp_min
               );
               dailyForecast[date].maxTemp = Math.max(
-                  dailyForecast[date].maxTemp,
-                  item.main.temp_max
+                dailyForecast[date].maxTemp,
+                item.main.temp_max
               );
             }
           });
