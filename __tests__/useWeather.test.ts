@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useWeather } from '@/hooks/useWeather';
+import { useWeatherData } from '@/hooks/useWeatherData';
+import { useForecastData } from '@/hooks/useForecastData';
 
 const mockLocation = {
   latitude: 40.7128,
@@ -47,7 +48,7 @@ const mockForecastData = {
   ],
 };
 
-describe('useWeather hook', () => {
+describe('useWeatherData and useForecastData hooks', () => {
   beforeAll(() => {
     // Mock the entire navigator.geolocation object
     global.navigator.geolocation = {
@@ -90,7 +91,7 @@ describe('useWeather hook', () => {
   });
 
   it('fetches weather data successfully', async () => {
-    const { result } = renderHook(() => useWeather());
+    const { result } = renderHook(() => useWeatherData(mockLocation));
 
     await waitFor(() => expect(result.current.weather).not.toBeNull());
 
@@ -99,7 +100,7 @@ describe('useWeather hook', () => {
   });
 
   it('fetches forecast data successfully', async () => {
-    const { result } = renderHook(() => useWeather());
+    const { result } = renderHook(() => useForecastData(mockLocation));
 
     await waitFor(() =>
       expect(result.current.forecast.length).toBeGreaterThan(0)
@@ -119,11 +120,23 @@ describe('useWeather hook', () => {
       Promise.reject(new Error('API error'))
     ) as jest.Mock;
 
-    const { result } = renderHook(() => useWeather());
+    const { result } = renderHook(() => useWeatherData(mockLocation));
 
     await waitFor(() => expect(result.current.errorMessage).not.toBeNull());
 
     expect(result.current.weather).toBeNull();
+    expect(result.current.errorMessage).toBe('API error');
+  });
+
+  it('handles fetch error properly', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.reject(new Error('API error'))
+    ) as jest.Mock;
+
+    const { result } = renderHook(() => useForecastData(mockLocation));
+
+    await waitFor(() => expect(result.current.errorMessage).not.toBeNull());
+
     expect(result.current.forecast.length).toBe(0);
     expect(result.current.errorMessage).toBe('API error');
   });

@@ -1,9 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import Home from '../app/page';
-import { useWeather } from '../hooks/useWeather';
+import { useWeatherData } from '@/hooks/useWeatherData';
+import { useForecastData } from '@/hooks/useForecastData';
+import { useLocation } from '@/hooks/useLocation';
 
 // Mock the useWeather hook
-jest.mock('../hooks/useWeather');
+jest.mock('../hooks/useWeatherData');
+jest.mock('../hooks/useForecastData');
+jest.mock('../hooks/useLocation');
 
 describe('Home component', () => {
   beforeEach(() => {
@@ -13,7 +17,15 @@ describe('Home component', () => {
 
   test('renders weather and forecast data correctly', () => {
     // Define the mock implementation for the first test
-    useWeather.mockImplementation(() => ({
+    useLocation.mockImplementation(() => ({
+      location: {
+        latitude: 51.50853,
+        longitude: -0.12574,
+      },
+
+      errorMessage: null,
+    }));
+    useWeatherData.mockImplementation(() => ({
       weather: {
         temperature: 15,
         feels_like: 13,
@@ -26,6 +38,9 @@ describe('Home component', () => {
         country: 'GB',
         icon: '01d',
       },
+      errorMessage: null,
+    }));
+    useForecastData.mockImplementation(() => ({
       forecast: [
         {
           date: 'Monday, 21 March',
@@ -51,16 +66,28 @@ describe('Home component', () => {
   });
 
   test('renders error message when there is an error', () => {
-    useWeather.mockImplementation(() => ({
+    useLocation.mockImplementation(() => ({
+      location: {
+        latitude: 51.50853,
+        longitude: -0.12574,
+      },
+      errorMessage: null,
+    }));
+    useWeatherData.mockImplementation(() => ({
       weather: null,
-      forecast: [],
       errorMessage: 'Failed to fetch weather data.',
     }));
-
+    useForecastData.mockImplementation(() => ({
+      forecast: [],
+      errorMessage: 'Failed to fetch forecast data.',
+    }));
     render(<Home />);
 
     expect(
       screen.getByText('Failed to fetch weather data.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Failed to fetch forecast data.')
     ).toBeInTheDocument();
   });
 });
