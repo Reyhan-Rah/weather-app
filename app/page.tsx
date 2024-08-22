@@ -2,10 +2,12 @@
 
 import Weather from '../components/weather';
 import Forecast from '../components/forecast';
-import { useWeather } from '../hooks/useWeather';
+import { useLocation } from '@/hooks/useLocation';
+import { useWeatherData } from '@/hooks/useWeatherData';
 
 export default function Home() {
-  const { weather, forecast, errorMessage } = useWeather();
+  const { location, errorMessage } = useLocation();
+  const { weather } = useWeatherData(location);
 
   const handleClose = () => {
     if (weather) {
@@ -41,13 +43,11 @@ export default function Home() {
         <div className='text-red-500'>
           <p>{errorMessage}</p>
         </div>
-      ) : weather ? (
-        <>
-          <Weather weather={weather} />
-          <Forecast forecast={forecast} />
-        </>
       ) : (
-        <p>Loading weather data...</p>
+        <>
+          <Weather location={location} />
+          <Forecast location={location} />
+        </>
       )}
     </div>
   );
