@@ -11,6 +11,10 @@ interface Location {
 export default function Forecast({ location }: Location | null) {
   const { forecast, errorMessage } = useForecastData(location);
 
+  if (!location) {
+    return <div>No location available</div>;
+  }
+
   return (
     <div className='mt-8'>
       {errorMessage ? (

@@ -11,6 +11,10 @@ interface Location {
 export default function Weather({ location }: Location | null) {
   const { weather, errorMessage } = useWeatherData(location);
 
+  if (!location) {
+    return <div>No location available</div>;
+  }
+
   return (
     <div className='rounded-lg bg-white p-6 text-center shadow-lg'>
       {errorMessage ? (

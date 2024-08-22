@@ -44,10 +44,12 @@ export default function Home() {
           <p>{errorMessage}</p>
         </div>
       ) : (
-        <>
-          <Weather location={location} />
-          <Forecast location={location} />
-        </>
+        location && (
+          <>
+            <Weather location={location} />
+            <Forecast location={location} />
+          </>
+        )
       )}
     </div>
   );
