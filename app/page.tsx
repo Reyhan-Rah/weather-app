@@ -12,16 +12,7 @@ export default function Home() {
   const handleClose = () => {
     if (weather) {
       const weatherData = {
-        temperature: weather.temperature,
-        feels_like: weather.feels_like,
-        humidity: weather.humidity,
-        pressure: weather.pressure,
-        wind_speed: weather.wind_speed,
-        wind_deg: weather.wind_deg,
-        description: weather.description,
-        city: weather.city,
-        country: weather.country,
-        icon: weather.icon,
+        ...weather,
         lastUpdated: new Date().toISOString(),
       };
 

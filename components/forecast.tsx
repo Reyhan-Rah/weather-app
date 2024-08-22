@@ -8,7 +8,7 @@ interface Location {
   longitude: number;
 }
 
-export default function Forecast({ location }: Location | null) {
+export default function Forecast({ location }: { location: Location | null }) {
   const { forecast, errorMessage } = useForecastData(location);
 
   if (!location) {
