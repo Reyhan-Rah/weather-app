@@ -49,14 +49,7 @@ export function useForecastData(
           const dailyForecast: { [key: string]: ForecastData } = {};
 
           data?.list?.forEach((item: ForecastListData) => {
-            const date = new Date(item.dt * 1000).toLocaleDateString(
-              undefined,
-              {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              }
-            );
+            const date = new Date(item.dt * 1000).toLocaleDateString();
             if (!dailyForecast[date]) {
               dailyForecast[date] = {
                 date,
