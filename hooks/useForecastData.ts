@@ -10,20 +10,6 @@ interface ForecastData {
   icon: string;
 }
 
-interface ForecastListData {
-  main: {
-    feels_like: number;
-    temp_min: number;
-    temp_max: number;
-  };
-  dt: string;
-  weather: {
-    description: string;
-    icon: string;
-    main: string;
-  }[];
-}
-
 export function useForecastData(
   location: { latitude: number; longitude: number } | null
 ) {
@@ -48,7 +34,7 @@ export function useForecastData(
 
           const dailyForecast: { [key: string]: ForecastData } = {};
 
-          data?.list?.forEach((item: ForecastListData) => {
+          data?.list?.forEach((item: any) => {
             const date = new Date(item.dt * 1000).toLocaleDateString();
             if (!dailyForecast[date]) {
               dailyForecast[date] = {
