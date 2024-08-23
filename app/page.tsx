@@ -22,6 +22,8 @@ export default function Home() {
       // Navigate away (set iframe src to a blank page)
       window.parent.postMessage({ action: 'navigateAway' }, '*');
     }
+    // Navigate away (set iframe src to a blank page)
+    window.parent.postMessage({ action: 'navigateAway' }, '*');
   };
 
   return (
@@ -34,13 +36,13 @@ export default function Home() {
         <div className='text-red-500'>
           <p>{errorMessage}</p>
         </div>
+      ) : !location ? (
+        <p>Loading ...</p>
       ) : (
-        location && (
-          <>
-            <Weather location={location} />
-            <Forecast location={location} />
-          </>
-        )
+        <>
+          <Weather location={location} />
+          <Forecast location={location} />
+        </>
       )}
     </div>
   );
